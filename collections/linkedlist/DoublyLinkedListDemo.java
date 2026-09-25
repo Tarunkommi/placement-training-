@@ -1,5 +1,3 @@
-package collections.linkedlist;
-
 class DNode {
     int data;
     DNode prev;

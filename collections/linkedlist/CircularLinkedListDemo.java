@@ -1,5 +1,3 @@
-package collections.linkedlist;
-
 class CNode {
     int data;
     CNode next;

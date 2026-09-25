@@ -24,11 +24,12 @@ A structured quick-reference guide covering Java fundamentals, Object-Oriented P
    - [Key Keywords: static & final](#64-key-keywords-static--final)
 7. [Exception Handling](#7-exception-handling)
 8. [Java Collections Framework](#8-java-collections-framework)
-   - [List (ArrayList, LinkedList)](#81-list-interface)
-   - [Set (HashSet, TreeSet)](#82-set-interface)
-   - [Queue (PriorityQueue, ArrayDeque)](#83-queue-interface)
-   - [Map (HashMap, TreeMap)](#84-map-interface)
-   - [Iterating Collections](#85-iterating-over-collections)
+   - [List Interface Overview](#81-list-interface-overview)
+   - [Deep Dive: ArrayList in Java](#82-deep-dive-arraylist-in-java)
+   - [Set (HashSet, TreeSet)](#83-set-interface)
+   - [Queue (PriorityQueue, ArrayDeque)](#84-queue-interface)
+   - [Map (HashMap, TreeMap)](#85-map-interface)
+   - [Iterating Collections](#86-iterating-over-collections)
 
 ---
 
@@ -498,36 +499,111 @@ The Collections Framework provides pre-built data structures and algorithms in `
 
 ---
 
-### 8.1 List Interface
-- **Characteristics**: Ordered, allows duplicates, positional indexing.
-- `ArrayList`: Fast random access (backed by dynamic array).
-- `LinkedList`: Fast insertions/deletions (doubly linked list).
+### 8.1 List Interface Overview
+- **Characteristics**: Ordered collection (maintains insertion order), permits duplicate elements, positional access via zero-based indexing.
+- **Common Implementations**: `ArrayList` (dynamic array), `LinkedList` (doubly-linked list), `Vector` (synchronized dynamic array).
 
+---
+
+### 8.2 Deep Dive: ArrayList in Java
+
+#### 1. What is an ArrayList?
+An `ArrayList` is a resizable, dynamic array implementation of the `List` interface found in `java.util`. Unlike standard Java arrays which have a fixed size, an `ArrayList` grows and shrinks automatically as elements are added or removed.
+
+#### 2. Key Characteristics
+- **Dynamic Resizing**: Automatically expands capacity when full.
+- **Ordered**: Preserves the order in which elements are inserted.
+- **Allows Duplicates & Null**: Can store multiple identical elements and `null` values.
+- **Indexed Access (Random Access)**: Provides fast $O(1)$ access time via `get(index)` because elements are stored in contiguous memory.
+- **Not Synchronized**: By default, it is not thread-safe (faster for single-threaded usage). For thread safety, use `Collections.synchronizedList(new ArrayList<>())` or `CopyOnWriteArrayList`.
+
+#### 3. Internal Working: How ArrayList Grows
+- **Default Initial Capacity**: `10`
+- **Growth Formula**: When the internal array becomes full, Java creates a new larger array and copies the elements over:
+  $$\text{New Capacity} = \text{Old Capacity} + (\text{Old Capacity} \gg 1) \approx 1.5 \times \text{Old Capacity}$$
+- **Time Complexities**:
+  - `get(index)`: $O(1)$ (Constant time)
+  - `add(element)` (at the end): $O(1)$ amortized
+  - `add(index, element)`: $O(n)$ (requires shifting elements to the right)
+  - `remove(index)`: $O(n)$ (requires shifting elements to the left)
+  - `contains(element)`: $O(n)$ (linear search)
+
+#### 4. Array vs. ArrayList
+
+| Feature | Standard Array (`T[]`) | `ArrayList<T>` |
+| :--- | :--- | :--- |
+| **Size** | Fixed length upon creation | Dynamic (grows/shrinks automatically) |
+| **Data Types** | Stores primitives (`int`) and Objects | Stores Objects only (uses wrapper classes like `Integer`) |
+| **Size Property** | `.length` (attribute) | `.size()` (method) |
+| **Adding Elements** | `arr[index] = value;` | `list.add(value);` or `list.add(index, value);` |
+| **Performance** | Slightly faster (less memory overhead) | Highly flexible with rich built-in utility methods |
+| **Generics Support**| No (invariant) | Yes (type-safe via `<T>`) |
+
+#### 5. Common ArrayList Methods
+
+| Method | Syntax | Description |
+| :--- | :--- | :--- |
+| `add(E e)` | `list.add("Apple");` | Appends element to end |
+| `add(int index, E e)` | `list.add(1, "Mango");` | Inserts element at specified index |
+| `get(int index)` | `list.get(0);` | Returns element at index |
+| `set(int index, E e)` | `list.set(2, "Orange");` | Replaces element at index |
+| `remove(int index)` | `list.remove(1);` | Removes element at index |
+| `remove(Object o)` | `list.remove("Apple");` | Removes first occurrence of object |
+| `contains(Object o)` | `list.contains("Mango");` | Checks if element exists (`true`/`false`) |
+| `size()` | `list.size();` | Returns number of elements |
+| `isEmpty()` | `list.isEmpty();` | Checks if list has 0 elements |
+| `clear()` | `list.clear();` | Removes all elements |
+| `Collections.sort(list)`| `Collections.sort(list);` | Sorts list in natural ascending order |
+
+#### 6. Complete Working Example
 ```java
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 
-public class ListDemo {
+public class ArrayListExample {
     public static void main(String[] args) {
-        List<String> fruits = new ArrayList<>();
+        // Creating an ArrayList of Strings
+        ArrayList<String> fruits = new ArrayList<>();
 
-        // Add
+        // 1. Adding elements
         fruits.add("Apple");
         fruits.add("Banana");
-        fruits.add("Apple"); // duplicate allowed
+        fruits.add("Mango");
+        fruits.add(1, "Orange"); // Insert at index 1
 
-        // Access
-        System.out.println("First item: " + fruits.get(0));
+        System.out.println("List: " + fruits); // [Apple, Orange, Banana, Mango]
 
-        // Size & Print
-        System.out.println("All fruits: " + fruits);
+        // 2. Accessing & Updating
+        System.out.println("Item at index 2: " + fruits.get(2)); // Banana
+        fruits.set(2, "Pineapple"); // Replace index 2
+
+        // 3. Removing
+        fruits.remove("Apple"); // Remove by value
+        fruits.remove(0);       // Remove by index (removes Orange)
+
+        // 4. Searching & Size
+        System.out.println("Contains Mango? " + fruits.contains("Mango"));
+        System.out.println("Size: " + fruits.size());
+
+        // 5. Sorting
+        Collections.sort(fruits);
+        System.out.println("Sorted: " + fruits);
+
+        // 6. Iterating
+        for (String fruit : fruits) {
+            System.out.println("- " + fruit);
+        }
+
+        // 7. Clearing
+        fruits.clear();
+        System.out.println("Is Empty: " + fruits.isEmpty());
     }
 }
 ```
 
 ---
 
-### 8.2 Set Interface
+### 8.3 Set Interface
 - **Characteristics**: Unique elements only (no duplicates).
 - `HashSet`: Unordered, O(1) performance using hashing.
 - `TreeSet`: Sorted in ascending order, O(log n) using Red-Black Tree.
@@ -554,7 +630,7 @@ public class SetDemo {
 
 ---
 
-### 8.3 Queue Interface
+### 8.4 Queue Interface
 - **Characteristics**: First-In, First-Out (FIFO) or priority ordering.
 - `PriorityQueue`: Elements ordered by natural priority or comparator.
 - `ArrayDeque`: Double-ended queue (faster than `Stack` and `LinkedList`).
@@ -578,7 +654,7 @@ public class QueueDemo {
 
 ---
 
-### 8.4 Map Interface
+### 8.5 Map Interface
 - **Characteristics**: Key-Value pairs; keys are unique, values can be duplicated.
 - `HashMap`: Fast lookups O(1), unordered.
 - `TreeMap`: Keys sorted in natural ascending order.
@@ -609,7 +685,7 @@ public class MapDemo {
 
 ---
 
-### 8.5 Iterating Over Collections
+### 8.6 Iterating Over Collections
 
 #### 1. Enhanced For-Loop
 ```java
